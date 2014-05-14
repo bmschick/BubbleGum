@@ -16,6 +16,7 @@ import ui.widget.GridView;
  * it adds the start button as a child.
  */
 exports = Class(ui.ImageView, function (supr) {
+
 	this.init = function (opts) {
 		opts = merge(opts, {
 			x: 0,
@@ -24,6 +25,9 @@ exports = Class(ui.ImageView, function (supr) {
 		});
 
 		supr(this, 'init', [opts]);
+		
+		this._bubbleloaded = false;
+		this._score = 0;
 
 		this.build();
 	};
@@ -78,6 +82,12 @@ exports = Class(ui.ImageView, function (supr) {
 			color: '#D0A080',
 			text: '000'
 		});
+		
+		this.on('app:start', bind( this, function(){
+			this._score = 0;
+			this._scoreBoard.setText(this._score.toString());
+			this.loadBubble();
+		}));
 		
 		
 		// This is the bubblecomb to hold the image views for the bubbles
@@ -155,17 +165,27 @@ exports = Class(ui.ImageView, function (supr) {
 		for( var vrow = 0; vrow < 9; vrow++ ){
 			for( var vcol = 0; vcol < 8-vrow%2; vcol++ ){
 				this._bubblearray[vrow][vcol].on('InputSelect', bind( this, function(a, b){
-					this._animateBubble.clear();
-					this._animateBubble.now({
-						x: (a%2 === 0 ? 32+32*b : 48+32*b),
-						y: (96+32*a)},
-						1000,
-						animate.easeOut)
-					.then({
-						x: 144, y: 416},0)
-					.then(bind(this, function(c,d){
-						this._bubblearray[a][b].setImage('resources/images/bubble.png');
-					},a,b));
+					if( this._bubbleloaded === true )
+					{
+						this._bubbleloaded = false;
+						this._animateBubble.clear();
+						this._animateBubble.now({
+							x: (a%2 === 0 ? 32+32*b : 48+32*b),
+							y: (96+32*a)},
+							1000,
+							animate.easeOut)
+						.then(bind(this, function(c,d){
+							this._bubblearray[c][d].setImage(this._loadedBubble.getImage());
+							this._score += 10;
+							this._scoreBoard.setText(this._score.toString());
+							},a,b))					
+						.then({
+							x: 144, y: 416, image: ''},0)
+						.then(bind( this, function(){
+							this.loadBubble();
+						}));
+	
+					}
 				},vrow,vcol));
 			}
 		}
@@ -178,6 +198,32 @@ exports = Class(ui.ImageView, function (supr) {
 				this._bubblearray[vrow][vcol].setImage('');
 			}
 		}
+	};
+	
+	this.loadBubble = function(){
+		// Pick a color.
+		var pick = Math.random()*4 | 0;
+		switch(pick){
+			case 0:
+				this._loadedBubble.setImage('resources/images/bubble.png');
+				break;
+			case 1:
+				this._loadedBubble.setImage('resources/images/bluebubble.png');
+				break;
+			case 2:
+				this._loadedBubble.setImage('resources/images/yellowbubble.png');
+				break;
+			case 3:
+				this._loadedBubble.setImage('resources/images/greenbubble.png');
+				break;
+		}
+		// Set image to color.
+		// Set to bubbleloaded.
+		this._bubbleloaded = true;
+	};
+	
+	this.getScore = function(){
+		return this._score;
 	};
 
 });

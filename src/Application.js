@@ -59,6 +59,7 @@ exports = Class(GC.Application, function () {
 //			sound.play('levelmusic');
 			this.gameview.clearArray();
 			this.rootView.push(this.gameview);
+			this.gameview.emit('app:start');
 		}));
 
 		this.mainmenu.on('titlescreen:quit', bind(this,function () {
@@ -69,6 +70,7 @@ exports = Class(GC.Application, function () {
 		this.mainmenu.on('titlescreen:score', bind(this,function () {
 			this.rootView.style.backgroundColor = '#6060D0';
 //			sound.play('levelmusic');
+			this.scoreview.setScore(0);
 			this.rootView.push(this.scoreview);
 		}));
 
@@ -77,6 +79,7 @@ exports = Class(GC.Application, function () {
 		 */
 		this.gameview.on('gameview:done',bind(this,function(){
 			this.rootView.pop();  // TODO: transition here to avoid.
+			this.scoreview.setScore(this.gameview.getScore());
 			this.rootView.push(this.scoreview);
 		}));
 			

@@ -7,6 +7,7 @@
  */
 
 import ui.View;
+import ui.TextView;
 import ui.ImageView;
 
 /* The title screen is added to the scene graph when it becomes
@@ -14,6 +15,9 @@ import ui.ImageView;
  * it adds the start button as a child.
  */
 exports = Class(ui.ImageView, function (supr) {
+
+	var playerscore;
+
 	this.init = function (opts) {
 		opts = merge(opts, {
 			x: 0,
@@ -22,7 +26,9 @@ exports = Class(ui.ImageView, function (supr) {
 		});
 
 		supr(this, 'init', [opts]);
-
+		
+		this.playerscore = 0;
+		
 		this.build();
 	};
 
@@ -46,5 +52,41 @@ exports = Class(ui.ImageView, function (supr) {
 		startbutton.on('InputSelect', bind(this, function () {
 			this.emit('scoreview:done');
 		}));
+		
+		this._scoreTitle = new ui.TextView({
+			superview: this,
+			x: 0,
+			y: 32,
+			width: 160,
+			height: 32,
+			autoSize: false,
+			size: 24,
+			verticalAlign: 'middle',
+			horizontalAlign: 'center',
+			wrap: false,
+			color: '#D0A080',
+			text: 'Score: '
+		});
+		
+		this._scoreBoard = new ui.TextView({
+			superview: this,
+			x: 160,
+			y: 32,
+			width: 160,
+			height: 32,
+			autoSize: true,
+			size: 24,
+			verticalAlign: 'middle',
+			horizontalAlign: 'center',
+			wrap: false,
+			color: '#D0A080',
+			text: '000'
+		});
+				
 	};
+	
+	this.setScore = function(s){
+		this.playerscore = s;
+		this._scoreBoard.setText(this.playerscore.toString());
+	}
 });
